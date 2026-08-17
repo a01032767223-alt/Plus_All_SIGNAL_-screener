@@ -1,0 +1,73 @@
+name: 미국주식 스크리닝
+
+on:
+  schedule:
+    # 21:30 UTC = 한국시간 다음날 06:30 (미국장 마감 후)
+    #   서머타임(3~11월) : 마감 16:00 ET = 20:00 UTC → 1시간 30분 뒤 실행
+    #   겨울시간(11~3월) : 마감 16:00 ET = 21:00 UTC → 30분 뒤 실행
+    # 월~금(UTC) 실행 → 한국시간 화~토 아침에 결과가 도착합니다.
+    - cron: "30 21 * * 1-5"
+  workflow_dispatch:          # 수동 실행 버튼
+
+concurrency:
+  group: screen-us
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 스크리닝 실행
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          PAGES_URL: ${{ vars.PAGES_URL }}
+        run: python -m screener.run --market us --notify
+
+      - name: 결과 커밋
+        env:
+          # ${{ }}를 run 블록 안에서 직접 펼치면 브랜치 이름이 셸 명령으로
+          # 해석될 수 있어(스크립트 인젝션) 환경변수로 받아서 인용해 씁니다.
+          REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "screener-bot"
+          git config user.email "actions@github.com"
+          git add docs/data
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+            exit 0
+          fi
+          git commit -m "미국주식 스크리닝 $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M')"
+          # 다른 시장 워크플로가 동시에 push했을 수 있어 rebase 후 재시도합니다.
+          # rebase가 충돌로 멈추면 반드시 abort해야 다음 시도가 가능합니다.
+          for i in 1 2 3; do
+            if git pull --rebase --autostash origin "$REF" && git push; then
+              echo "push 성공 (시도 $i)"
+              exit 0
+            fi
+            # abort하면 방금 만든 커밋은 그대로 남는다. reset --hard를 걸면
+            # 커밋까지 날아가 재시도할 게 없어지므로 abort까지만 한다.
+            git rebase --abort 2>/dev/null || true
+            echo "push 실패 — 재시도합니다 (시도 $i)"
+            sleep $((i * 10))
+          done
+          echo "::error::3회 시도했지만 결과를 push하지 못했습니다. 다른 워크플로와 충돌했을 수 있습니다."
+          exit 1
