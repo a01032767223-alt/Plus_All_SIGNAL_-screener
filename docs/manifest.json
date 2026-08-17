@@ -1,0 +1,16 @@
+{
+  "name": "매수신호 스크리너",
+  "short_name": "스크리너",
+  "description": "국내주식·미국주식·코인 매수 조건 자동 스크리닝",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141413",
+  "theme_color": "#141413",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

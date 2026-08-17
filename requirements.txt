@@ -1,0 +1,11 @@
+# 국내주식: 야후(가격) + FinanceDataReader(종목목록)
+#   KRX는 2025-12-27부터 로그인 필수로 바뀌어 서버 수집이 불가능합니다.
+pandas>=2.2,<3.0
+numpy>=1.26,<3.0
+requests>=2.31
+lxml>=5.0
+yfinance>=0.2.50
+finance-datareader>=0.9.90
+
+# 테스트 실행용 — CI가 `python -m pytest tests -q`로 전체를 돌립니다
+pytest>=8.0
