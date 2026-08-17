@@ -133,8 +133,13 @@ input[type=text]{width:100%;font-size:13px}
   color:var(--text-2);font:600 12px/1 inherit;cursor:pointer}
 .pbtn[aria-pressed="true"]{background:var(--surface-2);color:var(--text-1);border-color:var(--seq-400)}
 .pdesc{font-size:11.5px;color:var(--text-3);margin:8px 0 0;min-height:1.4em}
-summary.plain{color:var(--text-2);font-weight:600;margin-top:10px}
-summary.plain::before{content:"▸ "}
+summary.plain{color:var(--text-2);font-weight:600;margin-top:10px;
+  background:rgba(255,255,255,.05);border-radius:9px;padding:10px 11px;
+  margin-left:-11px;margin-right:-11px;cursor:pointer;
+  transition:background-color .15s ease}
+summary.plain:hover{background:rgba(255,255,255,.09)}
+summary.plain::before{content:"▸ ";margin-right:2px}
+details[open]>summary.plain{background:rgba(255,255,255,.07)}
 details[open]>summary.plain::before{content:"▾ "}
 .wrow{display:flex;align-items:center;gap:8px;margin-top:6px}
 .wrow .wl{flex:none;width:76px;font-size:12px;color:var(--text-2)}
