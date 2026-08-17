@@ -1,7 +1,7 @@
 /* 오프라인에서도 마지막 결과를 볼 수 있게 하는 최소 서비스워커.
    - 앱 셸: 캐시 우선
    - 데이터: 네트워크 우선, 실패 시 캐시된 마지막 결과 */
-const CACHE = "screener-v7";   // 내 전략 탭 추가 (index.html은 캐시 우선이라 이 값을 올려야 새 화면이 나간다)
+const CACHE = "screener-v8";   // 내 전략 탭 섹션 헤더 표시 개선 (index.html은 캐시 우선이라 이 값을 올려야 새 화면이 나간다)
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
